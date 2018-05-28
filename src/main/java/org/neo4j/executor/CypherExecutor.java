@@ -1,4 +1,6 @@
-package example.movies.executor;
+package org.neo4j.executor;
+
+import me.niels.QueryResult;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -7,5 +9,5 @@ import java.util.Map;
  * @author Michael Hunger @since 22.10.13
  */
 public interface CypherExecutor {
-    Iterator<Map<String,Object>> query(String statement, Map<String,Object> params);
+    QueryResult query(String statement, Map<String,Object> params);
 }

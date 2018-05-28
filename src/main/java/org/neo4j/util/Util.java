@@ -1,4 +1,4 @@
-package example.movies.util;
+package org.neo4j.util;
 
 /**
  * @author Michael Hunger @since 22.10.13

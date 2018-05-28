@@ -1,0 +1,117 @@
+
+[
+  {
+    "name": "Q1 - HR Analytics: Find a carpenter who has a skill in Java Programming and some other skills",
+    "queryString": "MATCH (p:Person)-[:HAS_COMPETENCY]->(c2:Competency {name:'Java Programming'}), (p)-[:HAS_COMPETENCY]->(c3:Competency {name:'Carpenter'}), (p)-[:HAS_COMPETENCY]->(c4:Competency) RETURN p.first_name, p.last_name, collect(c4.name)",
+    "labels": [
+      "collect"
+    ]
+  },
+  {
+    "name": "Q2 - HR Analytics: find the persons that have the same competencies, work/have worked at the same companies",
+    "queryString": "MATCH (p1:Person)-[:HAS_COMPETENCY]->(c:Competency)<-[:HAS_COMPETENCY]-(p2:Person), (p1)-->(co:Company)<--(p2) RETURN p1.first_name+' '+p1.last_name as Person1, p2.first_name+' '+p2.last_name as Person2, collect(distinct c.name), collect(distinct co.name) as Company LIMIT 50",
+    "labels": [
+      "collect",
+      "distinct"
+    ]
+  },
+  {
+    "name": "Q3 - HR Analytics: find how many people with same competencies have worked at same company",
+    "queryString": "MATCH (p1:Person)-[:HAS_COMPETENCY]->(c:Competency)<-[:HAS_COMPETENCY]-(p2:Person), (p1)-[:WORKED_FOR|:WORKS_FOR]->(co:Company)<-[:WORKED_FOR]-(p2) RETURN co.name as Company, c.name as Competency, count(p2) as Count ORDER BY Count desc LIMIT 10",
+    "labels": [
+      "limit",
+      "orderBy"
+    ]
+  },
+  {
+    "name": "Q4 - find the paths from some person outward",
+    "queryString": "MATCH p=(n:Person {first_name: {first_name}})-[:FRIEND_OF]-(m:Person) RETURN p UNION MATCH p=(n:Person {first_name: {first_name}})-[:FRIEND_OF]-()-[:FRIEND_OF]-(m:Person) RETURN p",
+    "parameterFile": "persons_params.txt",
+    "labels": [
+      "union"
+    ]
+  },
+  {
+    "name": "Q5 - Graph Theory: finding potential triadic closures",
+    "queryString": "MATCH path1=(p1:Person)-[:FRIEND_OF]-()-[:FRIEND_OF]-(p2:Person) WHERE NOT((p1)-[:FRIEND_OF]-(p2)) RETURN path1 LIMIT 50",
+    "labels": [
+      "triadic"
+    ]
+  },
+  {
+    "name": "Q6 - Graph Global: find the persons that have the same competencies, have worked at the same companies, are currently not working together, and are foaf",
+    "queryString": "MATCH (p1:Person)-[:HAS_COMPETENCY]->(c:Competency)<-[:HAS_COMPETENCY]-(p2:Person), (p1)-[:WORKED_FOR|:WORKS_FOR]->(co:Company)<-[:WORKED_FOR]-(p2) WHERE NOT((p1)-[:WORKS_FOR]->(co)<-[:WORKS_FOR]-(p2)) WITH p1,p2,c,co MATCH (p1)-[:FRIEND_OF]-()-[:FRIEND_OF]-(p2) RETURN p1.first_name+' '+p1.last_name as Person1, p2.first_name+' '+p2.last_name as Person2, collect(distinct c.name), collect(distinct co.name) as Company LIMIT 10",
+    "labels": [
+      "collect",
+      "distinct",
+      "limit"
+    ]
+  },
+  {
+    "name": "Q7 - Graph Local: find foaf of Mike that have the same competencies, have worked at the same companies, are currently not working together",
+    "queryString": "MATCH (p1:Person {first_name: 'Mike'})-[:HAS_COMPETENCY]->(c:Competency)<-[:HAS_COMPETENCY]-(p2:Person), (p1)-[:WORKED_FOR|:WORKS_FOR]->(co:Company)<-[:WORKED_FOR]-(p2) WHERE NOT((p1)-[:WORKS_FOR]->(co)<-[:WORKS_FOR]-(p2)) WITH p1,p2,c,co MATCH (p1)-[:FRIEND_OF]-()-[:FRIEND_OF]-(p2) RETURN p1.first_name+' '+p1.last_name as Person1, p2.first_name+' '+p2.last_name as Person2, collect(distinct c.name), collect(distinct co.name) as Company",
+    "labels": [
+      "collect",
+      "distinct"
+    ]
+  },
+  {
+    "name": "Q8 - Find the people already owning Brand X products",
+    "queryString": "MATCH (p:Person)-[b:BOUGHT]->(prod1:Product)-[:MADE_BY]->(br:Brand {name:{name}}) RETURN p.first_name+' '+p.last_name as Person, collect(prod1.name) as OwnedProducts ORDER BY Person ASC",
+    "parameterFile": "brands_params.txt",
+    "labesl": [
+      "collect",
+      "orderBy"
+    ]
+  },
+  {
+    "name": "Q9 - Find what kinds of people buy Brand X products",
+    "queryString": "MATCH (p:Person)-[b:BOUGHT]->(prod1:Product)-[:MADE_BY]->(br:Brand {name:{name}}) WITH DISTINCT p MATCH (p)-[:HAS_COMPETENCY]->(co:Competency) RETURN co.name, count(p) ORDER BY count(p) desc",
+    "parameterFile": "brands_params.txt",
+    "labels": [
+      "distinct",
+      "count",
+      "orderBy"
+    ]
+  },
+  {
+    "name": "Q10 - RECOMMEND PRODUCTS: find the OTHER products that 2 people that have the same competencies, work/have worked at the same companies, are friends and have bought the same product from that brand - Shawna Luna was the pathological input",
+    "queryString": "MATCH (p1:Person {name:'Shawna Luna'})-[:HAS_COMPETENCY]->(c:Competency)<-[:HAS_COMPETENCY]-(p2:Person) WITH p1,p2 MATCH (p1)-->(co:Company)<--(p2), (prod1:Product)<-[:BOUGHT]-(p1)-[:FRIEND_OF]-(p2)-[:BOUGHT]->(prod1) WITH p1, p2, prod1 MATCH (prod1)-[:MADE_BY]->(b:Brand)<-[:MADE_BY]-(prod2:Product) WHERE NOT ((p1)-[:BOUGHT]->(prod2)) RETURN p1.name, prod1.name, prod2.name LIMIT 10",
+    "labels": [
+      "recommendation"
+    ]
+  },
+  {
+    "name": "Q11 - Same as Q10 - RECOMMEND PRODUCTS, but starting at all Person-labelled nodes",
+    "queryString": "MATCH (p1:Person)-[:HAS_COMPETENCY]->(c:Competency)<-[:HAS_COMPETENCY]-(p2:Person) WITH p1,p2 MATCH (p1)-->(co:Company)<--(p2), (prod1:Product)<-[:BOUGHT]-(p1)-[:FRIEND_OF]-(p2)-[:BOUGHT]->(prod1) WITH p1, p2, prod1 MATCH (prod1)-[:MADE_BY]->(b:Brand)<-[:MADE_BY]-(prod2:Product) WHERE NOT ((p1)-[:BOUGHT]->(prod2)) RETURN p1.name, prod1.name, prod2.name LIMIT 10",
+    "labels": [
+      "triadicSquare",
+      "recommendation"
+    ]
+  },
+  {
+    "name": "Q12 - Graph Theory: betweenness centrality",
+    "queryString": "MATCH p=allShortestPaths((source:Person)-[:FRIEND_OF*]-(target:Person)) WHERE id(source) < id(target) WITH p WHERE length(p) > 1 UNWIND nodes(p)[1..-1] as n RETURN n.first_name, n.last_name, count(*) as betweenness ORDER BY betweenness DESC",
+    "labels": [
+      "allShortestPaths",
+      "graphGlobal"
+    ]
+  },
+  {
+    "name": "Q13 - Same as Q7 - FOAF same competencies - parametrized",
+    "queryString": "MATCH (p1:Person {first_name: {first_name}})-[:HAS_COMPETENCY]->(c:Competency)<-[:HAS_COMPETENCY]-(p2:Person), (p1)-[:WORKED_FOR|:WORKS_FOR]->(co:Company)<-[:WORKED_FOR]-(p2) WHERE NOT((p1)-[:WORKS_FOR]->(co)<-[:WORKS_FOR]-(p2)) WITH p1,p2,c,co MATCH (p1)-[:FRIEND_OF]-()-[:FRIEND_OF]-(p2) RETURN p1.first_name+' '+p1.last_name as Person1, p2.first_name+' '+p2.last_name as Person2, collect(distinct c.name), collect(distinct co.name) as Company",
+    "parameterFile": "persons_params.txt",
+    "labels": [
+      "collect",
+      "distinct"
+    ]
+  },
+  {
+    "name": "Q14 - Same as Q10 - RECOMMEND PRODUCTS - parametrized",
+    "queryString": "MATCH (p1:Person {name:{first_name}})-[:HAS_COMPETENCY]->(c:Competency)<-[:HAS_COMPETENCY]-(p2:Person) WITH p1,p2 MATCH (p1)-->(co:Company)<--(p2), (prod1:Product)<-[:BOUGHT]-(p1)-[:FRIEND_OF]-(p2)-[:BOUGHT]->(prod1) WITH p1, p2, prod1 MATCH (prod1)-[:MADE_BY]->(b:Brand)<-[:MADE_BY]-(prod2:Product) WHERE NOT ((p1)-[:BOUGHT]->(prod2)) RETURN p1.name, prod1.name, prod2.name LIMIT 10",
+    "parameterFile": "persons_params.txt",
+    "labels": [
+      "recommendation"
+    ]
+  }
+]

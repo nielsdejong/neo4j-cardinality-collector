@@ -92,7 +92,7 @@
                             <extraJvmArguments>-Xmx512m</extraJvmArguments>
                             <programs>
                                 <program>
-                                    <mainClass>example.movies.backend.MovieServer</mainClass>
+                                    <mainClass>me.niels.CardinalityTester</mainClass>
                                     <name>webapp</name>
                                 </program>
                             </programs>
@@ -112,7 +112,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>example.movies.backend.MovieServer</mainClass>
+                    <mainClass>me.niels.CardinalityTester</mainClass>
                 </configuration>
             </plugin>
         </plugins>

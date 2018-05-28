@@ -1,0 +1,59 @@
+[
+  {
+    "name": "Q1 - Friend-of-a-friend with interest",
+    "queryString": "MATCH (subject:User {name:{name}}) MATCH p=(subject)-[:WORKED_ON]->()<-[:WORKED_ON]-(person)-[:INTERESTED_IN]->(interest) WHERE person<>subject AND interest.name={topic} WITH DISTINCT person.name AS name, min(length(p)) as pathLength ORDER BY pathLength ASC LIMIT 10 RETURN name, pathLength UNION MATCH (subject:User {name:{name}}) MATCH p=(subject)-[:WORKED_ON]->()-[:WORKED_ON]-()<-[:WORKED_ON]-(person)-[:INTERESTED_IN]->(interest) WHERE person<>subject AND interest.name={topic} WITH DISTINCT person.name AS name, min(length(p)) as pathLength ORDER BY pathLength ASC LIMIT 10 RETURN name, pathLength UNION MATCH (subject:User {name:{name}}) MATCH p=(subject)-[:WORKED_ON]->()-[:WORKED_ON]-()-[:WORKED_ON]-()<-[:WORKED_ON]-(person)-[:INTERESTED_IN]->(interest) WHERE person<>subject AND interest.name={topic} WITH DISTINCT person.name AS name, min(length(p)) as pathLength ORDER BY pathLength ASC LIMIT 10 RETURN name, pathLength",
+    "parameterFile": "users_topics_params.txt"
+  },
+  {
+    "name": "Q2 - Friend-of-a-friend with multiple interests (dependant on rand)",
+    "queryString": "MATCH (subject:User {name:{name}}) MATCH p=(subject)-[:WORKED_ON]->()<-[:WORKED_ON]-(person)-[:INTERESTED_IN]->(interest) WHERE person<>subject AND interest.name IN {interests} WITH person, interest, min(length(p)) as pathLength ORDER BY interest.name RETURN person.name AS name, count(interest) AS score, collect(interest.name) AS interests, ((pathLength - 1)/2) AS distance ORDER BY score DESC LIMIT 10 UNION MATCH (subject:User {name:{name}}) MATCH p=(subject)-[:WORKED_ON]->()-[:WORKED_ON]-()<-[:WORKED_ON]-(person)-[:INTERESTED_IN]->(interest) WHERE person<>subject AND interest.name IN {interests} WITH person, interest, min(length(p)) as pathLength ORDER BY interest.name RETURN person.name AS name, count(interest) AS score, collect(interest.name) AS interests, ((pathLength - 1)/2) AS distance ORDER BY score DESC LIMIT 10 UNION MATCH (subject:User {name:{name}}) MATCH p=(subject)-[:WORKED_ON]->()-[:WORKED_ON]-()-[:WORKED_ON]-()<-[:WORKED_ON]-(person)-[:INTERESTED_IN]->(interest) WHERE person<>subject AND interest.name IN {interests} WITH person, interest, min(length(p)) as pathLength ORDER BY interest.name RETURN person.name AS name, count(interest) AS score, collect(interest.name) AS interests, ((pathLength - 1)/2) AS distance ORDER BY score DESC LIMIT 10",
+    "parameterFile": "users_multi_topics_params.txt"
+  },
+  {
+    "name": "Q3 - Friend worked with friend with interests (dependant on rand)",
+    "queryString": "MATCH (subject:User {name:{name}}) MATCH p=(subject)-[:WORKED_WITH]-(person)-[:INTERESTED_IN]->(interest) WHERE person<>subject AND interest.name IN {interests} WITH person, interest, min(length(p)) as pathLength RETURN person.name AS name, count(interest) AS score, collect(interest.name) AS interests, (pathLength - 1) AS distance ORDER BY score DESC LIMIT 10 UNION MATCH (subject:User {name:{name}}) MATCH p=(subject)-[:WORKED_WITH]-()-[:WORKED_WITH]-(person)-[:INTERESTED_IN]->(interest) WHERE person<>subject AND interest.name IN {interests} WITH person, interest, min(length(p)) as pathLength RETURN person.name AS name, count(interest) AS score, collect(interest.name) AS interests, (pathLength - 1) AS distance ORDER BY score DESC LIMIT 10",
+    "parameterFile": "users_multi_topics_params.txt"
+  },
+  {
+    "name": "Q4 - Shared interests all companies",
+    "queryString": "MATCH  (subject:User {name:{name}}) MATCH  (subject)-[:INTERESTED_IN]->(interest)<-[:INTERESTED_IN]-(person), (person)-[:WORKS_FOR]->(company) RETURN person.name AS name, company.name AS company, count(interest) AS score, collect(interest.name) AS interests ORDER BY score DESC",
+    "parameterFile": "users_params.txt"
+  },
+  {
+    "name": "Q5 - Shared interests also interested in topic",
+    "queryString": "MATCH (person:User {name:{name}}) MATCH (person)-[:INTERESTED_IN]->()<-[:INTERESTED_IN]-(colleague)-[:INTERESTED_IN]->(topic) WHERE topic.name={topic} WITH  colleague MATCH (colleague)-[:INTERESTED_IN]->(allTopics) RETURN colleague.name AS name, collect(distinct(allTopics.name)) AS topics",
+    "parameterFile": "users_topics_params.txt"
+  },
+  {
+    "name": "Q6 - Shared interests same company",
+    "queryString": "MATCH  (subject:User {name:{name}}) MATCH  (subject)-[:WORKS_FOR]->(company)<-[:WORKS_FOR]-(person), (subject)-[:INTERESTED_IN]->(interest)<-[:INTERESTED_IN]-(person) RETURN person.name AS name, count(interest) AS score, collect(interest.name) AS interests ORDER BY score DESC",
+    "parameterFile": "users_params.txt"
+  },
+  {
+    "name": "Q7 - Friend-of-a-friend with interest (orig. varlength path)",
+    "queryString": "MATCH (subject:User {name:{name}}) MATCH p=(subject)-[:WORKED_ON]->()-[:WORKED_ON*0..2]-()<-[:WORKED_ON]-(person)-[:INTERESTED_IN]->(interest) WHERE person<>subject AND interest.name={topic} WITH DISTINCT person.name AS name, min(length(p)) as pathLength ORDER BY pathLength ASC LIMIT 20 RETURN name, pathLength",
+    "parameterFile": "users_topics_params.txt"
+  },
+  {
+    "name": "Q8 - Friend-of-a-friend with multiple interest (orig. varlength path)",
+    "queryString": "MATCH (subject:User {name:{name}}) MATCH p=(subject)-[:WORKED_ON]->()-[:WORKED_ON*0..2]-()<-[:WORKED_ON]-(person)-[:INTERESTED_IN]->(interest) WHERE person<>subject AND interest.name IN {interests} WITH person, interest, min(length(p)) as pathLength ORDER BY interest.name RETURN person.name AS name, count(interest) AS score, collect(interest.name) AS interests, ((pathLength - 1)/2) AS distance ORDER BY score DESC LIMIT 20",
+    "parameterFile": "users_multi_topics_params.txt"
+  },
+  {
+    "name": "Q9 - Friend worked with friend with interests (orig. varlength path)",
+    "queryString": "MATCH (subject:User {name:{name}}) MATCH p=(subject)-[:WORKED_WITH*0..1]-()-[:WORKED_WITH]-(person)-[:INTERESTED_IN]->(interest) WHERE person<>subject AND interest.name IN {interests} WITH person, interest, min(length(p)) as pathLength RETURN person.name AS name, count(interest) AS score, collect(interest.name) AS interests, (pathLength - 1) AS distance ORDER BY score DESC LIMIT 20",
+    "parameterFile": "users_multi_topics_params.txt"
+  },
+  {
+    "name": "Q10 - The users who worked with most people share an interest with people they optionally have worked with",
+    "queryString": "MATCH (a:User {name:{name}})-[:INTERESTED_IN]->(t:Topic)<-[:INTERESTED_IN]-(b:User) OPTIONAL MATCH (a)-[:WORKED_WITH]->(b) RETURN count(*)",
+    "parameterFile": "dense_user_nodes_worked_with_param.txt",
+    "labels": ["optional","optionalExpandInto"]
+  },
+  {
+    "name": "Q11 - The users who worked with most people share an interest with people they have worked with",
+    "queryString": "MATCH (a:User {name:{name}})-[:INTERESTED_IN]->(t:Topic)<-[:INTERESTED_IN]-(b:User) MATCH (a)-[:WORKED_WITH]->(b) RETURN count(*)",
+    "parameterFile": "dense_user_nodes_worked_with_param.txt",
+    "labels": ["expandInto"]
+  }
+]

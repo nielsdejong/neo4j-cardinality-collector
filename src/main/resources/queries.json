@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Q1 - Entity List",
+    "queryString": "match (toFrom:Entity{Id:{eId}}), (segment)-[:precedes|is]->(startSegment), (toFrom)-[toFrom_rel:read|wrote]->(startSegment) with segment match (segment)-[:regarding_summary_phrase]->(entity) with segment, entity match (checkIgnoredWriter)-[:wrote]->(segment) where ((checkIgnoredWriter.Rank > 0 or checkIgnoredWriter.Rank is null)) and ((entity.Rank > 0 or entity.Rank is null)) and (NOT(entity.Id = {eId})) RETURN entity.Id as Id, entity.Name as Name, entity.Type as Type, entity.MentionNames as Mentions, count(distinct segment) as SegmentCount order by SegmentCount desc skip 0 limit 51",
+    "parameterFile": "entities_params.txt"
+  },
+  {
+    "name": "Q2 - Thread Count (with labels)",
+    "queryString": "match (toFrom:Entity{Id:{eId}}), (toFrom)-[toFrom_rel:read|wrote]->(segment:Segment), (copy)-[:of]->(document)-[documentSegment:containing]->(segment), (segment)-[:in_thread]->(thread:Thread), (checkIgnoredWriter:Entity)-[:wrote]->(segment) where (checkIgnoredWriter.Rank > 0 or checkIgnoredWriter.Rank is null) return count(distinct thread) as ThreadCount, count(distinct segment) as SegmentCount skip 0",
+    "parameterFile": "entities_params.txt"
+  },
+  {
+    "name": "Q3 - Similar Writers",
+    "queryString": "match (writer:Entity{Id:{eId}}), (writer)-[:wrote]->(segment)-[r1:regarding_entity]->(entity) with entity as names, count(entity) as counts order by count(entity) desc limit 100 with names, counts match (otherwriters)-[:wrote]->(segment)-[r2:regarding_entity]->(names) return otherwriters.Name as Name, otherwriters.Id as Id, count(distinct names) as EntityCount order by count(distinct names) desc skip 1 limit 3;",
+    "parameterFile": "entities_params.txt"
+  },
+  {
+    "name": "Q4 - Thread Count",
+    "queryString": "match (toFrom:Entity{Id:{eId}}), (toFrom)-[toFrom_rel:read|wrote]->(segment), (copy)-[:of]->(document)-[documentSegment:containing]->(segment), (segment)-[:in_thread]->(thread), (checkIgnoredWriter)-[:wrote]->(segment) where (checkIgnoredWriter.Rank > 0 or checkIgnoredWriter.Rank is null) return count(distinct thread) as ThreadCount, count(distinct segment) as SegmentCount skip 0",
+    "parameterFile": "entities_params.txt"
+  }
+]
