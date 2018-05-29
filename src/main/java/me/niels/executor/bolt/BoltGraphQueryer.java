@@ -1,25 +1,23 @@
-package me.niels;
-
-import org.neo4j.cypher.internal.frontend.v2_3.ast.Query;
-import org.neo4j.executor.BoltCypherExecutor;
-import org.neo4j.executor.CypherExecutor;
-import org.neo4j.helpers.collection.Iterators;
+package me.niels.executor.bolt;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 
+import org.neo4j.driver.v1.summary.ProfiledPlan;
+
 import static org.neo4j.helpers.collection.MapUtil.map;
 
-public class GraphQueryer {
+public class BoltGraphQueryer
+{
 
-    private final CypherExecutor cypher;
+    private final BoltCypherExecutor cypher;
 
-    public GraphQueryer(String uri) {
+    public BoltGraphQueryer(String uri) {
         cypher = createCypherExecutor(uri);
     }
 
-    private CypherExecutor createCypherExecutor(String uri) {
+    private BoltCypherExecutor createCypherExecutor(String uri) {
         try {
             String auth = new URL(uri.replace("bolt","http")).getUserInfo();
             if (auth != null) {
@@ -32,7 +30,7 @@ public class GraphQueryer {
         }
     }
 
-    public QueryResult profileQuery(String queryText, Map<String,Object> params ){
+    public ProfiledPlan profileQuery(String queryText, Map<String,Object> params ){
         return cypher.query("PROFILE " + queryText, params);
     }
 }

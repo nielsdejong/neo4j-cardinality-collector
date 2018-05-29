@@ -53,6 +53,22 @@
         </dependency>
 
         <dependency>
+            <groupId>org.neo4j</groupId>
+            <artifactId>neo4j</artifactId>
+            <version>3.4.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.neo4j</groupId>
+            <artifactId>neo4j-enterprise</artifactId>
+            <version>3.4.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.neo4j</groupId>
+            <artifactId>neo4j-enterprise-cypher</artifactId>
+            <version>3.4.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.7.21</version>
@@ -92,7 +108,7 @@
                             <extraJvmArguments>-Xmx512m</extraJvmArguments>
                             <programs>
                                 <program>
-                                    <mainClass>me.niels.CardinalityTester</mainClass>
+                                    <mainClass>me.niels.CardinalityAnalyzer</mainClass>
                                     <name>webapp</name>
                                 </program>
                             </programs>
@@ -112,7 +128,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>me.niels.CardinalityTester</mainClass>
+                    <mainClass>me.niels.CardinalityAnalyzer</mainClass>
                 </configuration>
             </plugin>
         </plugins>

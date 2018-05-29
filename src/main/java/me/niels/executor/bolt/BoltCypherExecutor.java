@@ -1,18 +1,16 @@
-package org.neo4j.executor;
-
-import me.niels.QueryResult;
+package me.niels.executor.bolt;
 
 import org.neo4j.driver.v1.*;
+import org.neo4j.driver.v1.summary.ProfiledPlan;
 import org.neo4j.helpers.collection.Iterators;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 /**
  * @author Michael Hunger @since 22.10.13
  */
-public class BoltCypherExecutor implements CypherExecutor
+public class BoltCypherExecutor
 {
 
     private final org.neo4j.driver.v1.Driver driver;
@@ -27,25 +25,10 @@ public class BoltCypherExecutor implements CypherExecutor
         driver = GraphDatabase.driver(url, token, Config.build().withEncryptionLevel(Config.EncryptionLevel.NONE).toConfig());
     }
 
-    @Override
-    public QueryResult query(String query, Map<String, Object> params) {
+    public ProfiledPlan query(String query, Map<String, Object> params) {
         try (Session session = driver.session()) {
             StatementResult result = session.run(query, params);
-
-            List<Map<String, Object>> list = result.list( r -> r.asMap(BoltCypherExecutor::convert));
-            return new QueryResult(query, Iterators.asCollection(list.iterator()).size(), result.consume().profile());
+            return result.consume().profile();
         }
     }
-
-    static Object convert(Value value) {
-        switch (value.type().name()) {
-            case "PATH":
-                return value.asList(BoltCypherExecutor::convert);
-            case "NODE":
-            case "RELATIONSHIP":
-                return value.asMap();
-        }
-        return value.asObject();
-    }
-
 }
