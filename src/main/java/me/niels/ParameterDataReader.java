@@ -1,7 +1,6 @@
 package me.niels;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -13,8 +12,19 @@ public class ParameterDataReader
 {
 
 
-    private  List<String[]> param_names = new ArrayList<>(  );
-    private List<List<Object[]>> param_values = new ArrayList<>(  );
+    private  List<String[]> parameterNames = new ArrayList<>(  );
+    private List<List<Object[]>> parameterValuesList = new ArrayList<>(  );
+
+    public List<String[]> getParameterNames()
+    {
+        return parameterNames;
+    }
+
+    public List<List<Object[]>> getParameterValuesList()
+    {
+        return parameterValuesList;
+    }
+
 
     public void readParameterData(List<String> queries, String parameterFolder, List<String> parameterFiles){
         // Populate params list
@@ -31,7 +41,7 @@ public class ParameterDataReader
                 for(int x = 0; x < param_names_string.length; x++){
                     param_names_string_parsed[x] = param_names_string[x].split( ":" )[0];
                 }
-                param_names.add( param_names_string_parsed );
+                parameterNames.add( param_names_string_parsed );
                 String line = "";
                 List<Object[]> values = new ArrayList<>();
                 line = br.readLine();
@@ -49,7 +59,7 @@ public class ParameterDataReader
                     values.add( paramValuesActual );
                     line = br.readLine();
                 }
-                param_values.add( values );
+                parameterValuesList.add( values );
                 br.close();
             }
             catch ( IOException e )

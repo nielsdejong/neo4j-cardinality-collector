@@ -1,3 +1,4 @@
+
 [
   {
     "name": "Q1 - Friend-of-a-friend with interest",
@@ -32,8 +33,7 @@
   {
     "name": "Q7 - Friend-of-a-friend with interest (orig. varlength path)",
     "queryString": "MATCH (subject:User {name:{name}}) MATCH p=(subject)-[:WORKED_ON]->()-[:WORKED_ON*0..2]-()<-[:WORKED_ON]-(person)-[:INTERESTED_IN]->(interest) WHERE person<>subject AND interest.name={topic} WITH DISTINCT person.name AS name, min(length(p)) as pathLength ORDER BY pathLength ASC LIMIT 20 RETURN name, pathLength",
-    "parameterFile": "users_topics_params.txt"
-  },
+    "parameterFile": "users_topics_params.txt"},
   {
     "name": "Q8 - Friend-of-a-friend with multiple interest (orig. varlength path)",
     "queryString": "MATCH (subject:User {name:{name}}) MATCH p=(subject)-[:WORKED_ON]->()-[:WORKED_ON*0..2]-()<-[:WORKED_ON]-(person)-[:INTERESTED_IN]->(interest) WHERE person<>subject AND interest.name IN {interests} WITH person, interest, min(length(p)) as pathLength ORDER BY interest.name RETURN person.name AS name, count(interest) AS score, collect(interest.name) AS interests, ((pathLength - 1)/2) AS distance ORDER BY score DESC LIMIT 20",

@@ -1,14 +1,12 @@
 package me.niels.executor.bolt;
 
+import me.niels.PlanWithCardinality;
+import me.niels.executor.GraphQueryer;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.Map;
 
-import org.neo4j.driver.v1.summary.ProfiledPlan;
-
-import static org.neo4j.helpers.collection.MapUtil.map;
-
-public class BoltGraphQueryer
+public class BoltGraphQueryer extends GraphQueryer
 {
 
     private final BoltCypherExecutor cypher;
@@ -30,7 +28,7 @@ public class BoltGraphQueryer
         }
     }
 
-    public ProfiledPlan profileQuery(String queryText, Map<String,Object> params ){
-        return cypher.query("PROFILE " + queryText, params);
+    public PlanWithCardinality getQueryPlan(String queryText, Map<String,Object> params ){
+        return new PlanWithCardinality(cypher.query("PROFILE " + queryText, params));
     }
 }
