@@ -36,7 +36,7 @@ public class QueryReader
         String queriesJSON = null;
         try
         {
-            queriesJSON = new String(Files.readAllBytes(Paths.get("src/main/resources/"+queryJSONFile)));
+            queriesJSON = new String(Files.readAllBytes(Paths.get(queryJSONFile)));
             JSONArray arr = new JSONArray( queriesJSON );
             for ( int i = 0; i < arr.length(); i++ )
             {

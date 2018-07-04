@@ -10,45 +10,48 @@ import java.util.List;
 
 import static org.neo4j.helpers.collection.MapUtil.map;
 
-/**
- * @author Michael Hunger @since 22.10.13
- */
+
 public class CardinalityAnalyzer
 {
-    static final String QUERY_JSON_FILE = "social_network_queries.json";
-    static final String PARAMETERS_FOLDER = "socialnetwork";
-    static final int PARAMETER_COMBINATIONS_LIMIT = 3;
+   // static final String QUERY_JSON_FILE = "C:/Users/Niels de Jong/Desktop/gmark_graph_to_neo4j_graph/queries.json";
+    static final String QUERY_JSON_FILE = "C:/Users/Niels de Jong/Desktop/neo4j-estimator-analyzer/src/main/resources/ldbc.json";
+    static final String PARAMETERS_FOLDER = "ldbc_sf001_p006";
+    static final int PARAMETER_COMBINATIONS_LIMIT = 1;
 
-    public static void main(String[] args) throws IOException
+    public static void main( String[] args ) throws IOException
     {
-
+        System.out.println( "analyzer" );
         QueryReader queryReader = new QueryReader();
         queryReader.readQueries( QUERY_JSON_FILE );
         ParameterDataReader pdm = new ParameterDataReader();
         pdm.readParameterData( queryReader.getQueries(), PARAMETERS_FOLDER, queryReader.getParameterFiles() );
-
-        EmbeddedGraphQueryer embeddedGraphQueryer = new EmbeddedGraphQueryer( new File("C:/Users/Niels de Jong/Downloads/socialnetwork/graph.db") );
-        QueryDataCollector embeddedDataCollector = new QueryDataCollector("3.4.0-SNAPSHOT", PARAMETER_COMBINATIONS_LIMIT, embeddedGraphQueryer);
+        //EmbeddedGraphQueryer embeddedGraphQueryer = new EmbeddedGraphQueryer( new File( "C:/Users/Niels de Jong/Desktop/simplegraph-morey/graph.db"));
+        //EmbeddedGraphQueryer embeddedGraphQueryer = new EmbeddedGraphQueryer( new File( "C:/Users/Niels de Jong/Desktop/fakedat/graph.db") );
+        EmbeddedGraphQueryer embeddedGraphQueryer = new EmbeddedGraphQueryer( new File( "C:/Users/Niels de Jong/Downloads/ldbc_sf001_p006/ldbc_sf001_p006~/graph.db" ) );
+        //EmbeddedGraphQueryer embeddedGraphQueryer = new EmbeddedGraphQueryer( new File( "C:/Users/Niels de Jong/Desktop/correlated/graph.db" ) );
+        //EmbeddedGraphQueryer embeddedGraphQueryer = new EmbeddedGraphQueryer( new File( "C:/Users/Niels de Jong/Desktop/bestcase2/graph.db" ) );
+        //EmbeddedGraphQueryer embeddedGraphQueryer = new EmbeddedGraphQueryer( new File( "C:/Users/Niels de Jong/Desktop/uniform/graph.db" ) );
+        //EmbeddedGraphQueryer embeddedGraphQueryer = new EmbeddedGraphQueryer( new File( "C:/Users/Niels de Jong/Desktop/bigram/graph.db") );
+        QueryDataCollector embeddedDataCollector = new QueryDataCollector( "_neo4j_BGCE", PARAMETER_COMBINATIONS_LIMIT, embeddedGraphQueryer );
         List<String> embeddedCardinalityData = embeddedDataCollector.getCardinalityDataForQueries( queryReader.getQueries(), pdm.getParameterNames(), pdm.getParameterValuesList() );
         embeddedGraphQueryer.shutdownDB();
         BoltGraphQueryer boltQueryer = new BoltGraphQueryer( "bolt://neo4j:niels@localhost" );
 
-        QueryDataCollector boltDataCollector = new QueryDataCollector("3.4.0", PARAMETER_COMBINATIONS_LIMIT, boltQueryer);
+        QueryDataCollector boltDataCollector = new QueryDataCollector( "_neo4j", PARAMETER_COMBINATIONS_LIMIT, boltQueryer );
         List<String> boltCardinalityData = boltDataCollector.getCardinalityDataForQueries( queryReader.getQueries(), pdm.getParameterNames(), pdm.getParameterValuesList() );
 
 
 
         // Create output file
-        File output = new File("src/main/resources/output.csv");
+        File output = new File( "src/main/resources/output.csv" );
         output.createNewFile();
-        FileWriter writer = new FileWriter(output);
+        FileWriter writer = new FileWriter( output );
         writer.write( "getQueryPlan, params," + boltCardinalityData.get( 0 ) + "," + embeddedCardinalityData.get(0) + "\n" );
         int count = 1;
         for(int q = 0; q < queryReader.getQueries().size(); q++)
-        //for(int q = 3; q < 4; q++)
         {
-            List<Object[]> current_param_values = pdm.getParameterValuesList().get( q );
-            for ( int paramValue = 0; paramValue < Math.min( PARAMETER_COMBINATIONS_LIMIT, current_param_values.size() ); paramValue++ )
+            List<Object[]> currentParamValues = pdm.getParameterValuesList().get( q );
+            for ( int paramValue = 0; paramValue < Math.min( PARAMETER_COMBINATIONS_LIMIT, currentParamValues.size() ); paramValue++ )
             {
                 String prefix =  (q+1) + "," + paramValue+ ",";
                 String output1 = boltCardinalityData.get( count );

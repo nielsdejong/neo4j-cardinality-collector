@@ -38,9 +38,13 @@ public class ParameterDataReader
                 br = new BufferedReader(new FileReader("src/main/resources/"+parameterFolder + "/" +parameterFiles.get( queries.indexOf( query ) )));
                 String[] param_names_string = br.readLine().split( "\\|" );
                 String[] param_names_string_parsed = new String[param_names_string.length];
+                String[] class_names = new String[param_names_string.length];
                 for(int x = 0; x < param_names_string.length; x++){
                     param_names_string_parsed[x] = param_names_string[x].split( ":" )[0];
+                    if(param_names_string[x].split( ":" ).length > 1)
+                     class_names[x] = param_names_string[x].split( ":" )[1];
                 }
+
                 parameterNames.add( param_names_string_parsed );
                 String line = "";
                 List<Object[]> values = new ArrayList<>();
@@ -51,7 +55,16 @@ public class ParameterDataReader
                     for(int pID = 0; pID < paramValuesString.length; pID ++){
                         String[] paramValueArray = paramValuesString[pID].split( "," );
                         if(paramValueArray.length == 1){
+
                             paramValuesActual[pID] = paramValueArray[0];
+                            if(class_names[pID] != null){
+                                if(class_names[pID].equals( "Long" )){
+                                    paramValuesActual[pID] =  Long.parseLong((String) paramValuesActual[pID] );
+                                }
+                                if(class_names[pID].equals( "Int" )){
+                                    paramValuesActual[pID] =  Integer.parseInt((String) paramValuesActual[pID] );
+                                }
+                            }
                         }else{
                             paramValuesActual[pID] = paramValueArray;
                         }

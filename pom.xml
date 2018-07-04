@@ -9,7 +9,7 @@
     <description>Neo4j Movies Demo App</description>
     <url>http://github.com/neo4j-examples/neo4j-movies-java-bolt</url>
     <properties>
-        <neo4j.version>3.4.0-SNAPSHOT</neo4j.version>
+        <neo4j.version>3.5.0-SNAPSHOT</neo4j.version>
     </properties>
 
     <dependencies>
@@ -46,7 +46,24 @@
             <version>${neo4j.version}</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.collections</groupId>
+            <artifactId>eclipse-collections-api</artifactId>
+            <version>9.2.0</version>
+        </dependency>
 
+        <dependency>
+            <groupId>org.eclipse.collections</groupId>
+            <artifactId>eclipse-collections</artifactId>
+            <version>9.2.0</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.eclipse.collections</groupId>
+            <artifactId>eclipse-collections-forkjoin</artifactId>
+            <version>9.2.0</version>
+        </dependency>
     </dependencies>
 
     <build>

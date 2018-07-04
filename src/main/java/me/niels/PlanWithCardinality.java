@@ -9,7 +9,7 @@ public class PlanWithCardinality
 {
 
     public final double realCardinality;
-    public final double estimatedCardinality;
+    public double estimatedCardinality;
     public final List<PlanWithCardinality> children;
 
     public PlanWithCardinality(ProfiledPlan plan){
