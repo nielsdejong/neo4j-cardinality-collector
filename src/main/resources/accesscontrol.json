@@ -1,0 +1,124 @@
+[
+    {
+      "name": "Q1",
+      "description": "More complex should get accessible companies for admin",
+      "queryString": "MATCH (admin:Administrator { name: { adminName }}) MATCH (admin)-[:MEMBER_OF]->()-[:ALLOWED_INHERIT]->(company) WHERE NOT ((admin)-[:MEMBER_OF]->()-[:DENIED]->(company)) RETURN company.name AS company UNION MATCH (admin:Administrator { name: { adminName }}) MATCH (admin)-[:MEMBER_OF]->()-[:ALLOWED_INHERIT]->()<-[:CHILD_OF]-(company) WHERE NOT ((admin)-[:MEMBER_OF]->()-[:DENIED]->()<-[:CHILD_OF]-(company)) RETURN company.name AS company UNION MATCH (admin:Administrator { name: { adminName }}) MATCH (admin)-[:MEMBER_OF]->()-[:ALLOWED_DO_NOT_INHERIT]->(company) RETURN company.name AS company",
+      "parameterFile": "administrators.txt"
+      
+    },
+  {
+    "name": "Q2",
+    "description": "Should find admin for account resource where allowed inherit and allowed not inherit",
+    "queryString": "MATCH (resource:Resource { name: { resourceName }}) MATCH p=(resource)-[:WORKS_FOR|HAS_ACCOUNT]-(company)<-[:ALLOWED_INHERIT]-()<-[:MEMBER_OF]-(admin) WHERE NOT ((admin)-[:MEMBER_OF]->()-[:DENIED]->(company)) RETURN admin.name AS admin UNION MATCH (resource:Resource { name: { resourceName }}) MATCH p=(resource)-[:WORKS_FOR|HAS_ACCOUNT]-(company)-[:CHILD_OF]->()<-[:ALLOWED_INHERIT]-()<-[:MEMBER_OF]-(admin) WHERE NOT ((admin)-[:MEMBER_OF]->()-[:DENIED]->()<-[:CHILD_OF]-(company)) RETURN admin.name AS admin UNION MATCH (resource:Resource { name: { resourceName }}) MATCH p=(resource)-[:WORKS_FOR|HAS_ACCOUNT]-()-[:WORKS_FOR|HAS_ACCOUNT]-(company)<-[:ALLOWED_INHERIT]-()<-[:MEMBER_OF]-(admin) WHERE NOT ((admin)-[:MEMBER_OF]->()-[:DENIED]->(company)) RETURN admin.name AS admin UNION MATCH (resource:Resource { name: { resourceName }}) MATCH p=(resource)-[:WORKS_FOR|HAS_ACCOUNT]-()-[:WORKS_FOR|HAS_ACCOUNT]-(company)-[:CHILD_OF]->()<-[:ALLOWED_INHERIT]-()<-[:MEMBER_OF]-(admin) WHERE NOT ((admin)-[:MEMBER_OF]->()-[:DENIED]->()<-[:CHILD_OF]-(company)) RETURN admin.name AS admin UNION MATCH (resource:Resource { name: { resourceName }}) MATCH p=(resource)-[:WORKS_FOR|HAS_ACCOUNT]-(company)<-[:ALLOWED_DO_NOT_INHERIT]-()<-[:MEMBER_OF]-(admin) RETURN admin.name AS admin UNION MATCH (resource:Resource { name: { resourceName }}) MATCH p=(resource)-[:WORKS_FOR|HAS_ACCOUNT]-()-[:WORKS_FOR|HAS_ACCOUNT]-(company)<-[:ALLOWED_DO_NOT_INHERIT]-()<-[:MEMBER_OF]-(admin) RETURN admin.name AS admin",
+    "parameterFile": "resources.txt"
+  },
+    {
+      "name": "Q3",
+      "description": "More complex should find accessible accounts for admin and company",
+      "queryString": "MATCH (admin:Administrator { name: { adminName }}),(company:Company { name: { companyName }}) MATCH (admin)-[:MEMBER_OF]->(group)-[:ALLOWED_INHERIT]->(company)<-[:WORKS_FOR]-(employee)-[:HAS_ACCOUNT]->(account) WHERE NOT ((admin)-[:MEMBER_OF]->()-[:DENIED]->(company)) RETURN account.name AS account UNION MATCH (admin:Administrator { name: { adminName }}),(company:Company { name: { companyName }}) MATCH (admin)-[:MEMBER_OF]->(group)-[:ALLOWED_INHERIT]->(company)<-[:CHILD_OF]-(subcompany)<-[:WORKS_FOR]-(employee)-[:HAS_ACCOUNT]->(account) WHERE NOT ((admin)-[:MEMBER_OF]->()-[:DENIED]->()<-[:CHILD_OF]-(subcompany)) RETURN account.name AS account UNION MATCH (admin:Administrator { name: { adminName }}),(company:Company { name: { companyName }}) MATCH (admin)-[:MEMBER_OF]->(group)-[:ALLOWED_DO_NOT_INHERIT]->(company)<-[:WORKS_FOR]-(employee)-[:HAS_ACCOUNT]->(account) RETURN account.name AS account",
+      "parameterFile": "administrators_companies.txt"
+    },
+    {
+      "name": "Q4",
+      "description": "More complex should find accessible accounts for admin and any matching company",
+      "queryString": "MATCH (admin:Administrator { name: { adminName }}) MATCH (admin)-[:MEMBER_OF]->(group)-[:ALLOWED_INHERIT]->(company:Company)<-[:WORKS_FOR]-(employee)-[:HAS_ACCOUNT]->(account) WHERE NOT ((admin)-[:MEMBER_OF]->()-[:DENIED]->(company)) RETURN account.name AS account UNION MATCH (admin:Administrator { name: { adminName }}) MATCH (admin)-[:MEMBER_OF]->(group)-[:ALLOWED_INHERIT]->(company:Company)<-[:CHILD_OF]-(subcompany)<-[:WORKS_FOR]-(employee)-[:HAS_ACCOUNT]->(account) WHERE NOT ((admin)-[:MEMBER_OF]->()-[:DENIED]->()<-[:CHILD_OF]-(subcompany)) RETURN account.name AS account UNION MATCH (admin:Administrator { name: { adminName }}) MATCH (admin)-[:MEMBER_OF]->(group)-[:ALLOWED_DO_NOT_INHERIT]->(company:Company)<-[:WORKS_FOR]-(employee)-[:HAS_ACCOUNT]->(account) RETURN account.name AS account",
+      "parameterFile": "administrators.txt"
+    },
+    {
+      "name": "Q5",
+      "description": "Should find admin for company with allowed inherit",
+      "queryString": "MATCH (company:Company { name: { companyName }}) MATCH (company)<-[:ALLOWED_INHERIT]-()<-[:MEMBER_OF]-(admin) WHERE NOT ((admin)-[:MEMBER_OF]->()-[:DENIED]->(company)) RETURN admin.name AS admin UNION MATCH (company:Company { name: { companyName }}) MATCH (company)-[:CHILD_OF]->()<-[:ALLOWED_INHERIT]-()<-[:MEMBER_OF]-(admin) WHERE NOT ((admin)-[:MEMBER_OF]->()-[:DENIED]->()<-[:CHILD_OF]-(company)) RETURN admin.name AS admin UNION MATCH (company:Company { name: { companyName }}) MATCH (company)<-[:ALLOWED_DO_NOT_INHERIT]-()<-[:MEMBER_OF]-(admin) RETURN admin.name AS admin",
+      "parameterFile": "companies.txt"
+    },
+    {
+      "name": "Q6",
+      "description": "Allowed with inherit=true gives access to sub-companies and accounts",
+      "queryFile": "queries/Q6.cypher",
+      "queryString": "MATCH (admin:Administrator { name: { adminName }}) MATCH paths=(admin)-[:MEMBER_OF]->()-[:ALLOWED_INHERIT]->(company)<-[:WORKS_FOR]-(employee)-[:HAS_ACCOUNT]->(account) WHERE NOT ((admin)-[:MEMBER_OF]->()-[:DENIED]->(company)) RETURN employee.name AS employee, account.name AS account UNION MATCH (admin:Administrator { name: { adminName }}) MATCH paths=(admin)-[:MEMBER_OF]->()-[:ALLOWED_INHERIT]->()<-[:CHILD_OF]-(company)<-[:WORKS_FOR]-(employee)-[:HAS_ACCOUNT]->(account) WHERE NOT ((admin)-[:MEMBER_OF]->()-[:DENIED]->()<-[:CHILD_OF]-(company)) RETURN employee.name AS employee, account.name AS account UNION MATCH (admin:Administrator { name: { adminName }}) MATCH paths=(admin)-[:MEMBER_OF]->()-[:ALLOWED_DO_NOT_INHERIT]->()<-[:WORKS_FOR]-(employee)-[:HAS_ACCOUNT]->(account) RETURN employee.name AS employee, account.name AS account",
+      "parameterFile": "administrators.txt"
+    },
+    {
+      "name": "Q7",
+      "description": "Should determine whether admin has access to a resource",
+      "queryString": "MATCH (admin:Administrator { name: { adminName }}),(resource:Resource { name: { resourceName }}) MATCH p=(admin)-[:MEMBER_OF]->()-[:ALLOWED_INHERIT]->(company)-[:WORKS_FOR|HAS_ACCOUNT]-(resource) WHERE NOT ((admin)-[:MEMBER_OF]->()-[:DENIED]->(company)) RETURN count(p) AS accessCount UNION MATCH (admin:Administrator { name: { adminName }}),(resource:Resource { name: { resourceName }}) MATCH p=(admin)-[:MEMBER_OF]->()-[:ALLOWED_INHERIT]->(company)-[:WORKS_FOR|HAS_ACCOUNT]-()-[:WORKS_FOR|HAS_ACCOUNT]-(resource) WHERE NOT ((admin)-[:MEMBER_OF]->()-[:DENIED]->(company)) RETURN count(p) AS accessCount UNION MATCH (admin:Administrator { name: { adminName }}),(resource:Resource { name: { resourceName }}) MATCH p=(admin)-[:MEMBER_OF]->()-[:ALLOWED_INHERIT]->()<-[:CHILD_OF]-(company)-[:WORKS_FOR|HAS_ACCOUNT]-(resource) WHERE NOT ((admin)-[:MEMBER_OF]->()-[:DENIED]->()<-[:CHILD_OF]-(company)) RETURN count(p) AS accessCount UNION MATCH (admin:Administrator { name: { adminName }}),(resource:Resource { name: { resourceName }}) MATCH p=(admin)-[:MEMBER_OF]->()-[:ALLOWED_INHERIT]->()<-[:CHILD_OF]-(company)-[:WORKS_FOR|HAS_ACCOUNT]-()-[:WORKS_FOR|HAS_ACCOUNT]-(resource) WHERE NOT ((admin)-[:MEMBER_OF]->()-[:DENIED]->()<-[:CHILD_OF]-(company)) RETURN count(p) AS accessCount UNION MATCH (admin:Administrator { name: { adminName }}),(resource:Resource { name: { resourceName }}) MATCH p=(admin)-[:MEMBER_OF]->()-[:ALLOWED_DO_NOT_INHERIT]->(company)-[:WORKS_FOR|HAS_ACCOUNT]-(resource) RETURN count(p) AS accessCount UNION MATCH (admin:Administrator { name: { adminName }}),(resource:Resource { name: { resourceName }}) MATCH p=(admin)-[:MEMBER_OF]->()-[:ALLOWED_DO_NOT_INHERIT]->(company)-[:WORKS_FOR|HAS_ACCOUNT]-()-[:WORKS_FOR|HAS_ACCOUNT]-(resource) RETURN count(p) AS accessCount",
+      "parameterFile": "union_administrators_resources.txt"
+    },
+  {
+    "name": "Q8",
+    "description": "More complex should get accessible companies for admin (orig. varlength paths)",
+    "queryString": "MATCH (admin:Administrator { name: { adminName }}) MATCH (admin)-[:MEMBER_OF]->()-[:ALLOWED_INHERIT]->()<-[:CHILD_OF*0..3]-(company) WHERE NOT ((admin)-[:MEMBER_OF]->()-[:DENIED]->()<-[:CHILD_OF*0..3]-(company)) RETURN company.name AS company UNION MATCH (admin:Administrator { name: { adminName }}) MATCH (admin)-[:MEMBER_OF]->()-[:ALLOWED_DO_NOT_INHERIT]->(company) RETURN company.name AS company",
+    "parameterFile": "administrators.txt"
+  },
+  {
+    "name": "Q9",
+    "description": "Should find admin for account resource where allowed inherit and allowed not inherit (orig. varlength paths)",
+    "queryString": "MATCH (resource:Resource { name: { resourceName }}) MATCH p=(resource)-[:WORKS_FOR|HAS_ACCOUNT*1..2]-(company)-[:CHILD_OF*0..3]->()<-[:ALLOWED_INHERIT]-()<-[:MEMBER_OF]-(admin) WHERE NOT ((admin)-[:MEMBER_OF]->()-[:DENIED]->()<-[:CHILD_OF*0..3]-(company)) RETURN admin.name AS admin UNION MATCH (resource:Resource { name: { resourceName }}) MATCH p=(resource)-[:WORKS_FOR|HAS_ACCOUNT*1..2]-(company)<-[:ALLOWED_DO_NOT_INHERIT]-()<-[:MEMBER_OF]-(admin) RETURN admin.name AS admin",
+    "parameterFile": "resources.txt"
+  },
+  {
+    "name": "Q10",
+    "description": "More complex should find accessible accounts for admin and company (orig. varlength paths)",
+    "queryString": "MATCH (admin:Administrator { name: { adminName }}),(company:Company { name: { companyName }}) MATCH (admin)-[:MEMBER_OF]->(group)-[:ALLOWED_INHERIT]->(company)<-[:CHILD_OF*0..3]-(subcompany)<-[:WORKS_FOR]-(employee)-[:HAS_ACCOUNT]->(account) WHERE NOT ((admin)-[:MEMBER_OF]->()-[:DENIED]->()<-[:CHILD_OF*0..3]-(subcompany)) RETURN account.name AS account UNION MATCH (admin:Administrator { name: { adminName }}),(company:Company { name: { companyName }}) MATCH (admin)-[:MEMBER_OF]->(group)-[:ALLOWED_DO_NOT_INHERIT]->(company)<-[:WORKS_FOR]-(employee)-[:HAS_ACCOUNT]->(account) RETURN account.name AS account",
+    "parameterFile": "union_administrators_companies.txt"
+  },
+  {
+    "name": "Q11",
+    "description": "More complex should find accessible accounts for admin and any matching company (orig. varlength paths)",
+    "queryString": "MATCH (admin:Administrator { name: { adminName }}) MATCH (admin)-[:MEMBER_OF]->(group)-[:ALLOWED_INHERIT]->(company:Company)<-[:CHILD_OF*0..3]-(subcompany)<-[:WORKS_FOR]-(employee)-[:HAS_ACCOUNT]->(account) WHERE NOT ((admin)-[:MEMBER_OF]->()-[:DENIED]->()<-[:CHILD_OF*0..3]-(subcompany)) RETURN account.name AS account UNION MATCH (admin:Administrator { name: { adminName }}) MATCH (admin)-[:MEMBER_OF]->(group)-[:ALLOWED_DO_NOT_INHERIT]->(company:Company)<-[:WORKS_FOR]-(employee)-[:HAS_ACCOUNT]->(account) RETURN account.name AS account",
+    "parameterFile": "administrators.txt"
+  },
+  {
+    "name": "Q12",
+    "description": "Should find admin for company with allowed inherit (orig. varlength paths)",
+    "queryString": "MATCH (company:Company { name: { companyName }}) MATCH (company)-[:CHILD_OF*0..3]->()<-[:ALLOWED_INHERIT]-()<-[:MEMBER_OF]-(admin) WHERE NOT ((admin)-[:MEMBER_OF]->()-[:DENIED]->()<-[:CHILD_OF*0..3]-(company)) RETURN admin.name AS admin UNION MATCH (company:Company { name: { companyName }}) MATCH (company)<-[:ALLOWED_DO_NOT_INHERIT]-()<-[:MEMBER_OF]-(admin) RETURN admin.name AS admin",
+    "parameterFile": "companies.txt"
+  },
+  {
+    "name": "Q13",
+    "description": "Allowed with inherit=true gives access to sub-companies and accounts (orig. varlength paths)",
+    "queryString": "MATCH (admin:Administrator { name: { adminName }}) MATCH paths=(admin)-[:MEMBER_OF]->()-[:ALLOWED_INHERIT]->()<-[:CHILD_OF*0..3]-(company)<-[:WORKS_FOR]-(employee)-[:HAS_ACCOUNT]->(account) WHERE NOT ((admin)-[:MEMBER_OF]->()-[:DENIED]->()<-[:CHILD_OF*0..3]-(company)) RETURN employee.name AS employee, account.name AS account UNION MATCH (admin:Administrator { name: { adminName }}) MATCH paths=(admin)-[:MEMBER_OF]->()-[:ALLOWED_DO_NOT_INHERIT]->()<-[:WORKS_FOR]-(employee)-[:HAS_ACCOUNT]->(account) RETURN employee.name AS employee, account.name AS account",
+    "parameterFile": "administrators.txt"
+  },
+  {
+    "name": "Q14",
+    "description": "Should determine whether admin has access to resource (orig. varlength paths)",
+    "queryString": "MATCH (admin:Administrator { name: { adminName }}),(resource:Resource { name: { resourceName }}) MATCH p=(admin)-[:MEMBER_OF]->()-[:ALLOWED_INHERIT]->()<-[:CHILD_OF*0..3]-(company)-[:WORKS_FOR|HAS_ACCOUNT*1..2]-(resource) WHERE NOT ((admin)-[:MEMBER_OF]->()-[:DENIED]->()<-[:CHILD_OF*0..3]-(company)) RETURN count(p) AS accessCount UNION MATCH (admin:Administrator { name: { adminName }}),(resource:Resource { name: { resourceName }}) MATCH p=(admin)-[:MEMBER_OF]->()-[:ALLOWED_DO_NOT_INHERIT]->(company)-[:WORKS_FOR|HAS_ACCOUNT*1..2]-(resource) RETURN count(p) AS accessCount",
+    "parameterFile": "administrators_resources.txt"
+  },
+  {
+    "name": "Q15",
+    "description": "first part of Q7",
+    "queryString": "MATCH (admin:Administrator { name: { adminName }}),(resource:Resource { name: { resourceName }}) MATCH p=(admin)-[:MEMBER_OF]->()-[:ALLOWED_INHERIT]->(company)-[:WORKS_FOR|HAS_ACCOUNT]-(resource) WHERE NOT ((admin)-[:MEMBER_OF]->()-[:DENIED]->(company)) RETURN count(p) AS accessCount",
+    "parameterFile": "administrators_resources.txt"
+  },
+  {
+    "name": "Q16",
+    "description": "second part of Q7",
+    "queryString": "MATCH (admin:Administrator { name: { adminName }}),(resource:Resource { name: { resourceName }}) MATCH p=(admin)-[:MEMBER_OF]->()-[:ALLOWED_INHERIT]->(company)-[:WORKS_FOR|HAS_ACCOUNT]-()-[:WORKS_FOR|HAS_ACCOUNT]-(resource) WHERE NOT ((admin)-[:MEMBER_OF]->()-[:DENIED]->(company)) RETURN count(p) AS accessCount",
+    "parameterFile": "administrators_resources.txt"
+  },
+  {
+    "name": "Q17",
+    "description": "third part of Q7",
+    "queryString": "MATCH (admin:Administrator { name: { adminName }}),(resource:Resource { name: { resourceName }}) MATCH p=(admin)-[:MEMBER_OF]->()-[:ALLOWED_INHERIT]->()<-[:CHILD_OF]-(company)-[:WORKS_FOR|HAS_ACCOUNT]-(resource) WHERE NOT ((admin)-[:MEMBER_OF]->()-[:DENIED]->()<-[:CHILD_OF]-(company)) RETURN count(p) AS accessCount",
+    "parameterFile": "administrators_resources.txt"
+  },
+  {
+    "name": "Q18",
+    "description": "fourth part of Q7",
+    "queryString": "MATCH (admin:Administrator { name: { adminName }}),(resource:Resource { name: { resourceName }}) MATCH p=(admin)-[:MEMBER_OF]->()-[:ALLOWED_INHERIT]->()<-[:CHILD_OF]-(company)-[:WORKS_FOR|HAS_ACCOUNT]-()-[:WORKS_FOR|HAS_ACCOUNT]-(resource) WHERE NOT ((admin)-[:MEMBER_OF]->()-[:DENIED]->()<-[:CHILD_OF]-(company)) RETURN count(p) AS accessCount",
+    "parameterFile": "administrators_resources.txt"
+  },
+  {
+    "name": "Q19",
+    "description": "fifth part of Q7",
+    "queryString": "MATCH (admin:Administrator { name: { adminName }}),(resource:Resource { name: { resourceName }}) MATCH p=(admin)-[:MEMBER_OF]->()-[:ALLOWED_DO_NOT_INHERIT]->(company)-[:WORKS_FOR|HAS_ACCOUNT]-(resource) RETURN count(p) AS accessCount",
+    "parameterFile": "administrators_resources.txt"
+  },
+  {
+    "name": "Q20",
+    "description": "sixth part of Q7",
+    "queryString": "MATCH (admin:Administrator { name: { adminName }}),(resource:Resource { name: { resourceName }}) MATCH p=(admin)-[:MEMBER_OF]->()-[:ALLOWED_DO_NOT_INHERIT]->(company)-[:WORKS_FOR|HAS_ACCOUNT]-()-[:WORKS_FOR|HAS_ACCOUNT]-(resource) RETURN count(p) AS accessCount",
+    "parameterFile": "administrators_resources.txt"
+  }
+  ]

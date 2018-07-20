@@ -15,19 +15,23 @@ public class BoltCypherExecutor
 
     private final org.neo4j.driver.v1.Driver driver;
 
-    public BoltCypherExecutor(String url) {
-        this(url, null, null);
+    public BoltCypherExecutor( String url )
+    {
+        this( url, null, null );
     }
 
-    public BoltCypherExecutor(String url, String username, String password) {
+    public BoltCypherExecutor( String url, String username, String password )
+    {
         boolean hasPassword = password != null && !password.isEmpty();
-        AuthToken token = hasPassword ? AuthTokens.basic(username, password) : AuthTokens.none();
-        driver = GraphDatabase.driver(url, token, Config.build().withEncryptionLevel(Config.EncryptionLevel.NONE).toConfig());
+        AuthToken token = hasPassword ? AuthTokens.basic( username, password ) : AuthTokens.none();
+        driver = GraphDatabase.driver( url, token, Config.build().withEncryptionLevel( Config.EncryptionLevel.NONE ).toConfig() );
     }
 
-    public ProfiledPlan query(String query, Map<String, Object> params) {
-        try (Session session = driver.session()) {
-            StatementResult result = session.run(query, params);
+    public ProfiledPlan query( String query, Map<String,Object> params )
+    {
+        try ( Session session = driver.session() )
+        {
+            StatementResult result = session.run( query, params );
             return result.consume().profile();
         }
     }
