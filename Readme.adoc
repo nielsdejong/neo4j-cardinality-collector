@@ -1,2 +1,2 @@
 == Neo4j Cardinality Estimations Analyzer Tool
-W.I.P.
+Runs a number of Neo4j queries and collects information about estimated and real cardinality values.
